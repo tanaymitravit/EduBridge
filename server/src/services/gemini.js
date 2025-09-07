@@ -2,7 +2,7 @@ import fetch from 'node-fetch';
 
 // Get API key from environment or use fallback
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || 'AIzaSyADB5oVVsrPgbd1wU5MQFEY3n8DBLNhUv4';
-const GEMINI_MODEL = process.env.GEMINI_MODEL || process.env.GOOGLE_MODEL || 'gemini-2.0-flash-exp';
+const GEMINI_MODEL = process.env.GEMINI_MODEL || process.env.GOOGLE_MODEL || 'gemini-1.5-flash';
 
 // Check if we have a valid API key (not just the fallback)
 const hasValidKey = GEMINI_API_KEY && GEMINI_API_KEY !== 'AIzaSyADB5oVVsrPgbd1wU5MQFEY3n8DBLNhUv4' && GEMINI_API_KEY.length > 20;
