@@ -12,7 +12,9 @@
     "start:server": "npm --workspace server run dev",
     "start:web": "npm --workspace apps/web run dev",
     "start:mobile": "npm --workspace apps/mobile run start",
-    "start": "concurrently \"npm run start:server\" \"npm run start:web\""
+    "start": "concurrently \"npm run start:server\" \"npm run start:web\"",
+    "build": "npm --workspace apps/web run build",
+    "vercel-build": "npm --workspace apps/web run build"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
