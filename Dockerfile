@@ -12,9 +12,17 @@ COPY . .
 
 # Install dependencies and build frontend
 WORKDIR /app/apps/web
-RUN npm install
-RUN npm install -D vite@latest @vitejs/plugin-react@latest
-RUN npm run build
+
+# Print debug information
+RUN echo "Current directory: $(pwd)" && ls -la
+RUN echo "Node version: $(node -v)" && echo "NPM version: $(npm -v)"
+
+# Install with verbose output
+RUN npm install --loglevel verbose
+RUN npm install -D vite@latest @vitejs/plugin-react@latest --loglevel verbose
+
+# Run build with debug output
+RUN npx vite build --debug
 
 # Stage 2: Build the backend
 FROM node:18-alpine
