@@ -4,16 +4,26 @@ FROM node:18-alpine as frontend-builder
 # Set working directory
 WORKDIR /app
 
-# Copy package files
+# Install necessary build tools
+RUN apk add --no-cache python3 make g++
+
+# Copy package files first for better caching
 COPY package*.json ./
 COPY apps/web/package*.json ./apps/web/
 
 # Install root dependencies
+WORKDIR /app
 RUN npm install
 
-# Build frontend
+# Copy the rest of the frontend files
+COPY apps/web/ ./apps/web/
+COPY tsconfig.json ./
+COPY vite.config.js ./
+
+# Install and build frontend
 WORKDIR /app/apps/web
 RUN npm install
+RUN npm install -D vite@latest
 RUN npm run build
 
 # Stage 2: Build the backend
