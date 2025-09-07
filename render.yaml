@@ -1,17 +1,33 @@
-# Render Blueprint for EduBridge
+# Render Blueprint for EduBridge (Combined Frontend + Backend)
 # Documentation: https://render.com/docs/blueprint-spec
 
 services:
-  # Backend Service
   - type: web
-    name: edubridge-backend
+    name: edubridge
     env: node
     plan: free
     region: oregon  # Choose the region closest to your users
     buildCommand: |
+      # Install dependencies
       npm install
+      cd apps/web
+      npm install
+      npm install -D vite@latest
+      
+      # Build frontend
       npm run build
-    startCommand: npm start
+      
+      # Move frontend build to server public directory
+      cd ../..
+      mkdir -p server/public
+      cp -r apps/web/dist/* server/public/
+      
+      # Install server dependencies
+      cd server
+      npm install
+    
+    startCommand: node server.js
+    
     envVars:
       - key: NODE_ENV
         value: production
@@ -21,32 +37,10 @@ services:
         sync: false  # Set this in Render dashboard
       - key: GEMINI_MODEL
         value: gemini-1.5-flash
-      - key: CORS_ORIGIN
-        value: https://edubridge-frontend.onrender.com  # Update with your frontend URL
-    healthCheckPath: /ping
-    autoDeploy: true
-    
-    # Auto-scale settings (for paid plans)
-    # numInstances: 1
-    # instanceSize: free
-
-  # Frontend Service
-  - type: web
-    name: edubridge-frontend
-    env: static
-    plan: free
-    region: oregon  # Same region as backend
-    buildCommand: |
-      cd apps/web
-      npm install
-      npm install -D vite@latest
-      npm run build
-    staticPublishPath: ./apps/web/dist
-    routes:
-      - type: rewrite
-        source: '/*'
-        destination: '/index.html'
-    envVars:
       - key: VITE_API_URL
+        value: /api  # API requests will be proxied through the same domain
+    
+    healthCheckPath: /api/ping
+    autoDeploy: true
         value: https://edubridge-backend.onrender.com  # Update with your backend URL
     autoDeploy: true

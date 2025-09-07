@@ -71,6 +71,17 @@ if (isProduction) {
   }));
 }
 
+// Serve static files from the public directory (frontend)
+app.use(express.static(path.join(__dirname, '../public'), {
+  maxAge: '1d',
+  setHeaders: (res, path) => {
+    // Set cache control for static assets
+    if (express.static.mime.lookup(path) === 'text/html') {
+      res.setHeader('Cache-Control', 'public, max-age=0');
+    }
+  }
+}));
+
 // API Routes
 app.use('/api/ai', aiRoutes);
 app.use('/api/gamify', gamifyRoutes);
@@ -168,6 +179,14 @@ app.post('/api/agent-conversation', async (req, res) => {
     console.error('Agent conversation error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
+});
+
+// Handle client-side routing - return index.html for all non-API routes
+app.get('*', (req, res) => {
+  if (!req.path.startsWith('/api/')) {
+    return res.sendFile(path.join(__dirname, '../public/index.html'));
+  }
+  next();
 });
 
 // Error handling middleware
