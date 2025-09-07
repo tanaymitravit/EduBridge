@@ -1,5 +1,5 @@
-# Use Node.js LTS
-FROM node:18-alpine
+# Stage 1: Build the frontend
+FROM node:18-alpine as frontend-builder
 
 # Set working directory
 WORKDIR /app
@@ -7,35 +7,48 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 COPY apps/web/package*.json ./apps/web/
-COPY server/package*.json ./server/
 
 # Install root dependencies
 RUN npm install
 
-# Install frontend dependencies
+# Build frontend
 WORKDIR /app/apps/web
 RUN npm install
-
-# Build frontend
 RUN npm run build
 
-# Install backend dependencies
+# Stage 2: Build the backend
+FROM node:18-alpine
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+COPY server/package*.json ./server/
+
+# Install production dependencies only
+RUN npm install --production
+
+# Install server dependencies
 WORKDIR /app/server
-RUN npm install
+RUN npm install --production
+
+# Copy built frontend from previous stage
+COPY --from=frontend-builder /app/apps/web/dist /app/server/public
 
 # Copy the rest of the application
 WORKDIR /app
 COPY . .
-
-# Copy frontend build to server public directory
-RUN mkdir -p /app/server/public
-RUN cp -r /app/apps/web/dist/* /app/server/public/
 
 # Set working directory to server
 WORKDIR /app/server
 
 # Expose the port the app runs on
 EXPOSE 10000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:10000/api/ping || exit 1
 
 # Start the application
 CMD ["node", "server.js"]

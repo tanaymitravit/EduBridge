@@ -11,6 +11,7 @@ services:
     # Docker configuration
     dockerContext: .
     dockerfile: Dockerfile
+    dockerCommand: ""  # Clear any default command
     
     # Environment variables
     envVars:
@@ -25,7 +26,6 @@ services:
       - key: VITE_API_URL
         value: /api  # API requests will be proxied through the same domain
     
+    # Health check
     healthCheckPath: /api/ping
-    autoDeploy: true
-        value: https://edubridge-backend.onrender.com  # Update with your backend URL
     autoDeploy: true
