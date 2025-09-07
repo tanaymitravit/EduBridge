@@ -18,8 +18,11 @@
     "start:prod": "node server/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "devDependencies": {
+  "dependencies": {
     "concurrently": "^8.2.2"
+  },
+  "devDependencies": {
+    "vite": "^4.5.0"
   },
   "engines": {
     "node": ">=16.0.0",
