@@ -5,8 +5,19 @@ const router = Router();
 
 router.get('/status', (req, res) => {
   const hasKey = !!process.env.GEMINI_API_KEY;
-  const model = process.env.GEMINI_MODEL || 'gemini-1.5-flash-latest';
-  res.json({ hasKey, model });
+  const hasGoogleKey = !!process.env.GOOGLE_API_KEY;
+  const model = process.env.GEMINI_MODEL || process.env.GOOGLE_MODEL || 'gemini-2.0-flash-exp';
+  const hasValidKey = hasKey || hasGoogleKey;
+  
+  res.json({ 
+    hasKey: hasValidKey, 
+    model,
+    details: {
+      geminiKey: hasKey,
+      googleKey: hasGoogleKey,
+      envVars: Object.keys(process.env).filter(k => k.includes('GEMINI') || k.includes('GOOGLE'))
+    }
+  });
 });
 
 router.post('/chat', async (req, res) => {

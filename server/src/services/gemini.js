@@ -1,15 +1,25 @@
 import fetch from 'node-fetch';
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'AIzaSyADB5oVVsrPgbd1wU5MQFEY3n8DBLNhUv4';
-const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.0-flash-exp';
+// Get API key from environment or use fallback
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || 'AIzaSyADB5oVVsrPgbd1wU5MQFEY3n8DBLNhUv4';
+const GEMINI_MODEL = process.env.GEMINI_MODEL || process.env.GOOGLE_MODEL || 'gemini-2.0-flash-exp';
 
-console.log('Gemini config:', { hasKey: !!GEMINI_API_KEY, model: GEMINI_MODEL, keyLength: GEMINI_API_KEY.length });
+// Check if we have a valid API key (not just the fallback)
+const hasValidKey = GEMINI_API_KEY && GEMINI_API_KEY !== 'AIzaSyADB5oVVsrPgbd1wU5MQFEY3n8DBLNhUv4' && GEMINI_API_KEY.length > 20;
+
+console.log('Gemini config:', { 
+  hasKey: !!GEMINI_API_KEY, 
+  hasValidKey,
+  model: GEMINI_MODEL, 
+  keyLength: GEMINI_API_KEY?.length,
+  envKeys: Object.keys(process.env).filter(k => k.includes('GEMINI') || k.includes('GOOGLE'))
+});
 
 const safeFallback = (text) => `AI (offline demo): ${text}`;
 
 export async function geminiChat(message, { level = 'beginner', language = 'en' } = {}) {
-  console.log('geminiChat called with:', { message, level, language, hasKey: !!GEMINI_API_KEY });
-  if (!GEMINI_API_KEY) return safeFallback(`${message}\n(level: ${level}, lang: ${language})`);
+  console.log('geminiChat called with:', { message, level, language, hasValidKey });
+  if (!hasValidKey) return safeFallback(`${message}\n(level: ${level}, lang: ${language})`);
   try {
     const system = `You are EduBridge, an educational assistant. Explain at ${level} level in ${language}. Keep answers concise and structured.`;
     const body = {
@@ -54,7 +64,7 @@ export async function geminiRecommend(topic = 'learning', { level = 'beginner', 
     { id: 'res1', title: `Intro ${topic} guide`, url: 'https://example.com/guide', offline: true },
     { id: 'res2', title: `${topic} video playlist`, url: 'https://example.com/playlist', offline: false }
   ];
-  if (!GEMINI_API_KEY) return demo;
+  if (!hasValidKey) return demo;
   try {
     const prompt = `List 3 beginner-friendly resources for ${topic} in ${language}. Output as bullet points with title and URL.`;
     const text = await geminiChat(prompt, { level, language });

@@ -105,14 +105,24 @@ export default function Resume() {
       'Alex',
       'Samantha',
       'Victoria',
-      'Karen'
+      'Karen',
+      'Fiona',
+      'Tessa',
+      'Moira',
+      'Veena',
+      'Rishi',
+      'Daniel'
     ]
     
     // Try to find a preferred voice
     for (const preferred of preferredVoices) {
-      const voice = voices.find(v => v.name.includes(preferred) || v.name === preferred)
+      const voice = voices.find(v => 
+        v.name.includes(preferred) || 
+        v.name === preferred ||
+        v.name.toLowerCase().includes(preferred.toLowerCase())
+      )
       if (voice) {
-        console.log('Selected voice:', voice.name)
+        console.log('Selected voice:', voice.name, 'Lang:', voice.lang, 'Default:', voice.default)
         return voice
       }
     }
@@ -125,7 +135,11 @@ export default function Resume() {
        v.name.toLowerCase().includes('zira') ||
        v.name.toLowerCase().includes('hazel') ||
        v.name.toLowerCase().includes('samantha') ||
-       v.name.toLowerCase().includes('alex'))
+       v.name.toLowerCase().includes('alex') ||
+       v.name.toLowerCase().includes('fiona') ||
+       v.name.toLowerCase().includes('tessa') ||
+       v.name.toLowerCase().includes('moira') ||
+       v.name.toLowerCase().includes('veena'))
     )
     
     if (englishFemale) {
@@ -167,12 +181,19 @@ export default function Resume() {
         }
         
         // Optimized parameters for natural conversation
-        utterance.rate = 0.85  // Slightly slower for more natural pace
-        utterance.pitch = 0.95 // Slightly lower pitch for warmth
-        utterance.volume = 0.9 // Slightly lower volume for comfort
+        utterance.rate = 0.75  // Slower for more natural, conversational pace
+        utterance.pitch = 1.0  // Normal pitch for natural sound
+        utterance.volume = 0.85 // Comfortable volume
         
-        // Add natural pauses and emphasis
-        utterance.text = text.replace(/\./g, '. ').replace(/\?/g, '? ').replace(/!/g, '! ')
+        // Add natural pauses and emphasis for better speech flow
+        utterance.text = text
+          .replace(/\./g, '. ')  // Add pause after periods
+          .replace(/\?/g, '? ')  // Add pause after questions
+          .replace(/!/g, '! ')   // Add pause after exclamations
+          .replace(/,/g, ', ')   // Add slight pause after commas
+          .replace(/:/g, ': ')   // Add pause after colons
+          .replace(/;/g, '; ')   // Add pause after semicolons
+          .replace(/\s+/g, ' ')  // Clean up extra spaces
         
         utterance.onend = () => {
           setIsPlaying(false)
