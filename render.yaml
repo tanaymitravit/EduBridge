@@ -1,25 +1,18 @@
-# Render Blueprint for EduBridge (Combined Frontend + Backend)
-# Documentation: https://render.com/docs/blueprint-spec
+# Render Blueprint for EduBridge (Docker Deployment)
+# Documentation: https://render.com/docs/docker
 
 services:
   - type: web
     name: edubridge
-    env: node
+    env: docker
     plan: free
     region: oregon  # Choose the region closest to your users
-    buildCommand: |
-      # Make the build script executable
-      chmod +x build.sh
-      # Run the build script
-      ./build.sh
     
-    startCommand: |
-      if [ -z "$RENDER" ]; then
-        cd server && node server.js
-      else
-        cd /opt/render/project/src/server && node server.js
-      fi
+    # Docker configuration
+    dockerContext: .
+    dockerfile: Dockerfile
     
+    # Environment variables
     envVars:
       - key: NODE_ENV
         value: production
