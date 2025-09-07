@@ -8,28 +8,17 @@ services:
     plan: free
     region: oregon  # Choose the region closest to your users
     buildCommand: |
-      # Set the project root
-      PROJECT_ROOT=/opt/render/project/src
-      
-      # Install root dependencies
-      cd $PROJECT_ROOT
-      npm install
-      
-      # Install and build frontend
-      cd $PROJECT_ROOT/apps/web
-      npm install
-      npm install -D vite@latest
-      npm run build
-      
-      # Create public directory and copy frontend build
-      mkdir -p $PROJECT_ROOT/server/public
-      cp -r $PROJECT_ROOT/apps/web/dist/* $PROJECT_ROOT/server/public/
-      
-      # Install server dependencies
-      cd $PROJECT_ROOT/server
-      npm install
+      # Make the build script executable
+      chmod +x build.sh
+      # Run the build script
+      ./build.sh
     
-    startCommand: cd /opt/render/project/src/server && node server.js
+    startCommand: |
+      if [ -z "$RENDER" ]; then
+        cd server && node server.js
+      else
+        cd /opt/render/project/src/server && node server.js
+      fi
     
     envVars:
       - key: NODE_ENV
