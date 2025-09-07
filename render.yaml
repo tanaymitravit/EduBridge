@@ -39,6 +39,7 @@ services:
     buildCommand: |
       cd apps/web
       npm install
+      npm install -D vite@latest
       npm run build
     staticPublishPath: ./apps/web/dist
     routes:

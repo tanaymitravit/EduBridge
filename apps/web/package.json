@@ -37,6 +37,9 @@
     "vite": "^5.4.1",
     "vite-plugin-checker": "^0.5.3"
   },
+  "resolutions": {
+    "vite": "^5.0.0"
+  },
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=7.0.0"
