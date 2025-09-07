@@ -1,0 +1,21 @@
+{
+  "name": "edubridge",
+  "private": true,
+  "version": "0.1.0",
+  "description": "EduBridge monorepo (MERN + Tailwind + Expo)",
+  "workspaces": [
+    "server",
+    "apps/web",
+    "apps/mobile"
+  ],
+  "scripts": {
+    "start:server": "npm --workspace server run dev",
+    "start:web": "npm --workspace apps/web run dev",
+    "start:mobile": "npm --workspace apps/mobile run start",
+    "start": "concurrently \"npm run start:server\" \"npm run start:web\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
+
