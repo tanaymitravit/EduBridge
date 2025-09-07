@@ -7,18 +7,8 @@ WORKDIR /app
 # Install necessary build tools
 RUN apk add --no-cache python3 make g++
 
-# Copy package files first for better caching
-COPY package*.json ./
-COPY apps/web/package*.json ./apps/web/
-
-# Install root dependencies
-WORKDIR /app
-RUN npm install
-
-# Copy the rest of the frontend files
-COPY apps/web/ ./apps/web/
-COPY tsconfig.json ./
-COPY vite.config.js ./
+# Copy all files first
+COPY . .
 
 # Install and build frontend
 WORKDIR /app/apps/web
