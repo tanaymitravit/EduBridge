@@ -7,13 +7,24 @@ WORKDIR /app
 # Install necessary build tools
 RUN apk add --no-cache python3 make g++
 
-# Copy all files first
-COPY . .
+# Copy package files first for better caching
+COPY package*.json ./
+COPY apps/web/package*.json ./apps/web/
 
-# Install and build frontend
+# Install root dependencies
+RUN npm install
+
+# Install frontend dependencies
 WORKDIR /app/apps/web
 RUN npm install
-RUN npm install -D vite@latest
+
+# Copy the rest of the application
+WORKDIR /app
+COPY . .
+
+# Build frontend
+WORKDIR /app/apps/web
+RUN npm install -D vite@latest @vitejs/plugin-react@latest
 RUN npm run build
 
 # Stage 2: Build the backend
