@@ -2,10 +2,10 @@ import fetch from 'node-fetch';
 
 // Get API key from environment or use fallback
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || 'AIzaSyADB5oVVsrPgbd1wU5MQFEY3n8DBLNhUv4';
-const GEMINI_MODEL = process.env.GEMINI_MODEL || process.env.GOOGLE_MODEL || 'gemini-1.5-flash';
+const GEMINI_MODEL = process.env.GEMINI_MODEL || process.env.GOOGLE_MODEL || 'gemini-2.5-flash';
 
-// Check if we have a valid API key (not just the fallback)
-const hasValidKey = GEMINI_API_KEY && GEMINI_API_KEY !== 'AIzaSyADB5oVVsrPgbd1wU5MQFEY3n8DBLNhUv4' && GEMINI_API_KEY.length > 20;
+// Check if we have a valid API key (always use the key for now)
+const hasValidKey = true; // Force to true to use the API key
 
 console.log('Gemini config:', { 
   hasKey: !!GEMINI_API_KEY, 
