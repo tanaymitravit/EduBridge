@@ -3,6 +3,9 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import helmet from 'helmet';
+import compression from 'compression';
+import morgan from 'morgan';
 
 // Import routes
 import aiRoutes from './routes/ai.js';
@@ -18,11 +21,33 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 10000;
+const isProduction = process.env.NODE_ENV === 'production';
+
+// Security middleware
+app.use(helmet());
+app.use(compression());
+
+// Logging
+if (isProduction) {
+  app.use(morgan('combined'));
+} else {
+  app.use(morgan('dev'));
+}
 
 // CORS configuration
+const allowedOrigins = isProduction 
+  ? [process.env.CORS_ORIGIN || 'https://edubridge-frontend.onrender.com']
+  : ['http://localhost:5173', 'http://localhost:5174'];
+
 const corsOptions = {
-  origin: process.env.CORS_ORIGIN || ['http://localhost:5173', 'http://localhost:5174'],
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   optionsSuccessStatus: 200
 };
@@ -32,8 +57,18 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Serve static files from the built React app
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../../apps/web/dist')));
+if (isProduction) {
+  const staticPath = path.join(__dirname, '../../apps/web/dist');
+  app.use(express.static(staticPath, {
+    maxAge: '1y',
+    etag: true,
+    lastModified: true,
+    setHeaders: (res, path) => {
+      if (path.endsWith('.html')) {
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      }
+    }
+  }));
 }
 
 // API Routes
@@ -135,6 +170,48 @@ app.post('/api/agent-conversation', async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`EduBridge API listening on http://localhost:${PORT}`);
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({
+    error: 'Something went wrong!',
+    ...(process.env.NODE_ENV === 'development' && { message: err.message })
+  });
+});
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({ error: 'Not Found' });
+});
+
+// Start the server
+const server = app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server is running in ${isProduction ? 'production' : 'development'} mode`);
+  console.log(`Server listening on port ${PORT}`);
+});
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (err) => {
+  console.error('UNHANDLED REJECTION! Shutting down...');
+  console.error(err);
+  server.close(() => {
+    process.exit(1);
+  });
+});
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (err) => {
+  console.error('UNCAUGHT EXCEPTION! Shutting down...');
+  console.error(err);
+  server.close(() => {
+    process.exit(1);
+  });
+});
+
+// Handle SIGTERM (for Render)
+process.on('SIGTERM', () => {
+  console.log('SIGTERM RECEIVED. Shutting down gracefully');
+  server.close(() => {
+    console.log('Process terminated!');
+  });
 });

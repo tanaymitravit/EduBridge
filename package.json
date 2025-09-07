@@ -13,11 +13,18 @@
     "start:web": "npm --workspace apps/web run dev",
     "start:mobile": "npm --workspace apps/mobile run start",
     "start": "concurrently \"npm run start:server\" \"npm run start:web\"",
-    "build": "npm --workspace apps/web run build",
-    "vercel-build": "npm --workspace apps/web run build"
+    "build": "npm run build:web && npm run build:server",
+    "build:web": "npm --workspace apps/web install && npm --workspace apps/web run build",
+    "build:server": "npm --workspace server install",
+    "start:prod": "node server/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=7.0.0"
   }
 }
 
