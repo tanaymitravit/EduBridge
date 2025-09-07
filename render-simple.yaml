@@ -3,10 +3,7 @@ services:
     name: edubridge-fullstack
     env: node
     plan: free
-    buildCommand: |
-      npm install
-      cd apps/web && npm install && npm run build
-      cd ../../server && npm install
+    buildCommand: ./build.sh
     startCommand: cd server && npm start
     envVars:
       - key: NODE_ENV

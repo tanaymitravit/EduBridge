@@ -4,9 +4,15 @@ services:
     env: node
     plan: free
     buildCommand: |
+      # Install root dependencies
       npm install
-      cd apps/web && npm install && npm run build
-      cd ../../server && npm install
+      # Install and build frontend
+      cd apps/web
+      npm install
+      npm run build
+      # Install backend dependencies
+      cd ../../server
+      npm install
     startCommand: cd server && npm start
     envVars:
       - key: NODE_ENV
