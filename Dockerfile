@@ -47,11 +47,8 @@ RUN if [ ! -f "tsconfig.json" ]; then \
 RUN echo "Current directory: $(pwd)" && ls -la
 RUN echo "Node version: $(node -v)" && echo "NPM version: $(npm -v)"
 
-# First try development build for better error output
-RUN npx vite build --mode development || (echo "Build failed. Directory contents:" && ls -la && cat package.json && exit 1)
-
-# Then run production build if development build succeeds
-RUN npx vite build --debug 2>&1
+# Build the application with detailed output
+RUN npx vite build --debug 2>&1 || (echo "Build failed. Directory contents:" && ls -la && echo "Node version: $(node -v)" && echo "NPM version: $(npm -v)" && exit 1)
 
 # Create public directory if it doesn't exist
 RUN mkdir -p /app/server/public
