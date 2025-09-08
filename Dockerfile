@@ -18,11 +18,17 @@ RUN npm install
 WORKDIR /app
 COPY . .
 
-# Build frontend
+# Build frontend with debug information
 WORKDIR /app/apps/web
-RUN npm install
-RUN npm install -D vite@latest @vitejs/plugin-react@latest
-RUN npm run build
+RUN echo "Current directory: $(pwd)" && ls -la
+RUN echo "Node version: $(node -v)" && echo "NPM version: $(npm -v)"
+
+# Install dependencies with verbose output
+RUN npm install --loglevel verbose
+RUN npm install -D vite@latest @vitejs/plugin-react@latest --loglevel verbose
+
+# Run build with debug output
+RUN npx vite build --debug 2>&1 || (echo "Build failed. Directory contents:" && ls -la && exit 1)
 
 # Create public directory if it doesn't exist
 RUN mkdir -p /app/server/public
