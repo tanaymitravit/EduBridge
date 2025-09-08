@@ -7,12 +7,15 @@ WORKDIR /app
 # Install necessary build tools
 RUN apk add --no-cache python3 make g++
 
+# Print environment information
+RUN echo "Node version: $(node -v)" && echo "NPM version: $(npm -v)"
+
 # Copy package files first for better caching
 COPY package*.json ./
 COPY apps/web/package*.json ./apps/web/
 
-# Install root dependencies
-RUN npm install
+# Install root dependencies with verbose output
+RUN npm install --loglevel verbose || (echo "Root dependency installation failed" && exit 1)
 
 # Copy the rest of the application
 WORKDIR /app
@@ -35,8 +38,8 @@ RUN mkdir -p /app/server/public
 ENV NODE_ENV=production
 
 # Install dependencies with verbose output
-RUN npm install --loglevel verbose
-RUN npm install -D vite@latest @vitejs/plugin-react@latest --loglevel verbose
+RUN npm install --loglevel verbose || (echo "Web app dependency installation failed" && exit 1)
+RUN npm install -D vite@latest @vitejs/plugin-react@latest --loglevel verbose || (echo "Dev dependency installation failed" && exit 1)
 
 # Create tsconfig.json if it doesn't exist
 RUN if [ ! -f "tsconfig.json" ]; then \
@@ -48,6 +51,7 @@ RUN echo "Current directory: $(pwd)" && ls -la
 RUN echo "Node version: $(node -v)" && echo "NPM version: $(npm -v)"
 
 # Build the application with detailed output
+RUN echo "Starting Vite build..."
 RUN npx vite build --debug 2>&1 || (echo "Build failed. Directory contents:" && ls -la && echo "Node version: $(node -v)" && echo "NPM version: $(npm -v)" && exit 1)
 
 # Create public directory if it doesn't exist
