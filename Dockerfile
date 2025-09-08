@@ -10,19 +10,16 @@ RUN apk add --no-cache python3 make g++
 # Copy all files first
 COPY . .
 
-# Install dependencies and build frontend
+# Create tsconfig.json if it doesn't exist
 WORKDIR /app/apps/web
+RUN if [ ! -f "tsconfig.json" ]; then \
+      echo '{"compilerOptions":{"target":"ES2020","useDefineForClassFields":true,"lib":["ES2020","DOM","DOM.Iterable"],"module":"ESNext","skipLibCheck":true,"moduleResolution":"node","resolveJsonModule":true,"isolatedModules":true,"noEmit":true,"jsx":"react-jsx","strict":true,"noUnusedLocals":true,"noUnusedParameters":true,"noFallthroughCasesInSwitch":true},"include":["src"],"references":[{"path":"../.."}]}' > tsconfig.json; \
+    fi
 
-# Print debug information
-RUN echo "Current directory: $(pwd)" && ls -la
-RUN echo "Node version: $(node -v)" && echo "NPM version: $(npm -v)"
-
-# Install with verbose output
-RUN npm install --loglevel verbose
-RUN npm install -D vite@latest @vitejs/plugin-react@latest --loglevel verbose
-
-# Run build with debug output
-RUN npx vite build --debug
+# Install dependencies and build frontend
+RUN npm install
+RUN npm install -D vite@latest @vitejs/plugin-react@latest
+RUN npx vite build
 
 # Stage 2: Build the backend
 FROM node:18-alpine
