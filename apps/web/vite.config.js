@@ -45,14 +45,12 @@ export default defineConfig(({ mode }) => {
       assetsDir: 'assets',
       emptyOutDir: true,
       sourcemap: isProduction ? 'hidden' : true,
-      rollupOptions: {
-        input: {
-          main: 'index.html'
-        }
-      },
       minify: isProduction ? 'terser' : 'esbuild',
       chunkSizeWarningLimit: 1000, // in kbs
       rollupOptions: {
+        input: {
+          main: 'index.html'
+        },
         output: {
           manualChunks: {
             vendor: ['react', 'react-dom', 'react-router-dom'],
