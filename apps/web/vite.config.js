@@ -14,6 +14,13 @@ export default defineConfig(({ mode }) => {
   console.log('Vite root directory:', root);
   console.log('Environment:', { NODE_ENV: process.env.NODE_ENV, mode });
 
+  // Set up paths
+  const srcPath = path.resolve(__dirname, './src');
+  const publicPath = path.resolve(__dirname, './public');
+  
+  console.log('Source directory:', srcPath);
+  console.log('Public directory:', publicPath);
+  
   return {
     plugins: [
       react(),
@@ -27,6 +34,7 @@ export default defineConfig(({ mode }) => {
 
     // Set root directory to the web app directory
     root: path.resolve(__dirname, './'),
+    publicDir: publicPath,
     
     // Base public path when served in production
     base: isProduction ? '/' : '/',

@@ -18,8 +18,15 @@ RUN npm install
 WORKDIR /app
 COPY . .
 
+# Set correct permissions
+RUN chmod -R 755 /app/apps/web/src
+
 # Build frontend with debug information
 WORKDIR /app/apps/web
+
+# Verify files are in place
+RUN echo "Current directory: $(pwd)" && ls -la
+RUN echo "Source directory contents:" && ls -la src/
 
 # Set environment to production
 ENV NODE_ENV=production
@@ -37,8 +44,11 @@ RUN if [ ! -f "tsconfig.json" ]; then \
 RUN echo "Current directory: $(pwd)" && ls -la
 RUN echo "Node version: $(node -v)" && echo "NPM version: $(npm -v)"
 
-# Run build with debug output
-RUN npx vite build --debug 2>&1 || (echo "Build failed. Directory contents:" && ls -la && exit 1)
+# First try development build for better error output
+RUN npx vite build --mode development || (echo "Build failed. Directory contents:" && ls -la && cat package.json && exit 1)
+
+# Then run production build if development build succeeds
+RUN npx vite build --debug 2>&1
 
 # Create public directory if it doesn't exist
 RUN mkdir -p /app/server/public
