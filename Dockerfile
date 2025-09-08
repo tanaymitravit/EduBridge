@@ -28,6 +28,9 @@ WORKDIR /app/apps/web
 RUN echo "Current directory: $(pwd)" && ls -la
 RUN echo "Source directory contents:" && ls -la src/
 
+# Create public directory for the server
+RUN mkdir -p /app/server/public
+
 # Set environment to production
 ENV NODE_ENV=production
 
@@ -70,10 +73,13 @@ RUN npm install --production
 WORKDIR /app/server
 RUN npm install --production
 
-# Copy built frontend from previous stage
+# Copy built frontend to server public directory
 COPY --from=frontend-builder /app/apps/web/dist /app/server/public
 
-# Ensure the public directory has the correct permissions
+# Verify the files were copied correctly
+RUN echo "Server public directory contents:" && ls -la /app/server/public
+
+# Set correct permissions
 RUN chmod -R 755 /app/server/public
 
 # Copy the rest of the application
