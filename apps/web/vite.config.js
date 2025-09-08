@@ -2,6 +2,7 @@ import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import { fileURLToPath, URL } from 'url';
 import { visualizer } from 'rollup-plugin-visualizer';
+import path from 'path';
 
 export default defineConfig(({ mode }) => {
   // Load environment variables based on the current mode
@@ -10,6 +11,8 @@ export default defineConfig(({ mode }) => {
   
   // Set the root directory to the current directory
   const root = process.cwd();
+  console.log('Vite root directory:', root);
+  console.log('Environment:', { NODE_ENV: process.env.NODE_ENV, mode });
 
   return {
     plugins: [
@@ -22,8 +25,8 @@ export default defineConfig(({ mode }) => {
       }),
     ].filter(Boolean),
 
-    // Set root directory
-    root: root,
+    // Set root directory to the web app directory
+    root: path.resolve(__dirname, './'),
     
     // Base public path when served in production
     base: isProduction ? '/' : '/',

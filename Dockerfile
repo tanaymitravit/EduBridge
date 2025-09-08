@@ -20,12 +20,22 @@ COPY . .
 
 # Build frontend with debug information
 WORKDIR /app/apps/web
-RUN echo "Current directory: $(pwd)" && ls -la
-RUN echo "Node version: $(node -v)" && echo "NPM version: $(npm -v)"
+
+# Set environment to production
+ENV NODE_ENV=production
 
 # Install dependencies with verbose output
 RUN npm install --loglevel verbose
 RUN npm install -D vite@latest @vitejs/plugin-react@latest --loglevel verbose
+
+# Create tsconfig.json if it doesn't exist
+RUN if [ ! -f "tsconfig.json" ]; then \
+      echo '{"compilerOptions":{"target":"ES2020","useDefineForClassFields":true,"lib":["ES2020","DOM","DOM.Iterable"],"module":"ESNext","skipLibCheck":true,"moduleResolution":"node","resolveJsonModule":true,"isolatedModules":true,"noEmit":true,"jsx":"react-jsx","strict":true,"noUnusedLocals":true,"noUnusedParameters":true,"noFallthroughCasesInSwitch":true},"include":["src"],"references":[{"path":"../.."}]}' > tsconfig.json; \
+    fi
+
+# Print debug information
+RUN echo "Current directory: $(pwd)" && ls -la
+RUN echo "Node version: $(node -v)" && echo "NPM version: $(npm -v)"
 
 # Run build with debug output
 RUN npx vite build --debug 2>&1 || (echo "Build failed. Directory contents:" && ls -la && exit 1)
