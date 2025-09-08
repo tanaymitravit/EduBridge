@@ -7,6 +7,9 @@ export default defineConfig(({ mode }) => {
   // Load environment variables based on the current mode
   const env = loadEnv(mode, process.cwd(), '');
   const isProduction = mode === 'production';
+  
+  // Set the root directory to the current directory
+  const root = process.cwd();
 
   return {
     plugins: [
@@ -19,6 +22,9 @@ export default defineConfig(({ mode }) => {
       }),
     ].filter(Boolean),
 
+    // Set root directory
+    root: root,
+    
     // Base public path when served in production
     base: isProduction ? '/' : '/',
 
@@ -28,6 +34,11 @@ export default defineConfig(({ mode }) => {
       assetsDir: 'assets',
       emptyOutDir: true,
       sourcemap: isProduction ? 'hidden' : true,
+      rollupOptions: {
+        input: {
+          main: 'index.html'
+        }
+      },
       minify: isProduction ? 'terser' : 'esbuild',
       chunkSizeWarningLimit: 1000, // in kbs
       rollupOptions: {
