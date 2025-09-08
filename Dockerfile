@@ -7,19 +7,25 @@ WORKDIR /app
 # Install necessary build tools
 RUN apk add --no-cache python3 make g++
 
-# Copy all files first
+# Copy package files first for better caching
+COPY package*.json ./
+COPY apps/web/package*.json ./apps/web/
+
+# Install root dependencies
+RUN npm install
+
+# Copy the rest of the application
+WORKDIR /app
 COPY . .
 
-# Create tsconfig.json if it doesn't exist
+# Build frontend
 WORKDIR /app/apps/web
-RUN if [ ! -f "tsconfig.json" ]; then \
-      echo '{"compilerOptions":{"target":"ES2020","useDefineForClassFields":true,"lib":["ES2020","DOM","DOM.Iterable"],"module":"ESNext","skipLibCheck":true,"moduleResolution":"node","resolveJsonModule":true,"isolatedModules":true,"noEmit":true,"jsx":"react-jsx","strict":true,"noUnusedLocals":true,"noUnusedParameters":true,"noFallthroughCasesInSwitch":true},"include":["src"],"references":[{"path":"../.."}]}' > tsconfig.json; \
-    fi
-
-# Install dependencies and build frontend
 RUN npm install
 RUN npm install -D vite@latest @vitejs/plugin-react@latest
-RUN npx vite build
+RUN npm run build
+
+# Create public directory if it doesn't exist
+RUN mkdir -p /app/server/public
 
 # Stage 2: Build the backend
 FROM node:18-alpine
@@ -40,6 +46,9 @@ RUN npm install --production
 
 # Copy built frontend from previous stage
 COPY --from=frontend-builder /app/apps/web/dist /app/server/public
+
+# Ensure the public directory has the correct permissions
+RUN chmod -R 755 /app/server/public
 
 # Copy the rest of the application
 WORKDIR /app
