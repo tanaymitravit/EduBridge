@@ -51,8 +51,16 @@ RUN echo "Current directory: $(pwd)" && ls -la
 RUN echo "Node version: $(node -v)" && echo "NPM version: $(npm -v)"
 
 # Build the application with detailed output
-RUN echo "Starting Vite build..."
-RUN npx vite build --debug 2>&1 || (echo "Build failed. Directory contents:" && ls -la && echo "Node version: $(node -v)" && echo "NPM version: $(npm -v)" && exit 1)
+RUN echo "Starting Vite build..." && \
+    npx vite build --debug 2>&1 || ( \
+        echo "\n=== Build failed. Debug information: ===" && \
+        echo "\n=== Node version ===" && node -v && \
+        echo "\n=== NPM version ===" && npm -v && \
+        echo "\n=== Directory structure ===" && ls -la && \
+        echo "\n=== package.json ===" && cat package.json && \
+        echo "\n=== npm list ===" && npm list --depth=0 && \
+        exit 1 \
+    )
 
 # Create public directory if it doesn't exist
 RUN mkdir -p /app/server/public
